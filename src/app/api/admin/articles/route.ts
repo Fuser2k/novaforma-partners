@@ -138,9 +138,14 @@ export async function POST(request: NextRequest) {
         }
 
         return NextResponse.json({ article }, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Create article error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Internal server error',
+            details: error.message,
+            code: error.code, // Prisma error code
+            meta: error.meta  // Prisma error meta
+        }, { status: 500 });
     }
 }
 
