@@ -1,22 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { getSession, verifyPassword, hashPassword } from '@/lib/auth';
-import { validatePasswordStrength, logSecurityEvent, registerLoginAttempt } from '@/lib/security';
-import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
-const changePasswordSchema = z.object({
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(12, "New password must be at least 12 characters"),
-    confirmPassword: z.string()
-}).refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-});
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { getSession, verifyPassword, hashPassword } from '@/lib/auth';
+import { validatePasswordStrength, logSecurityEvent } from '@/lib/security';
+import { z } from 'zod';
 
 export async function POST(request: NextRequest) {
     try {
+        // Schema definition moved inside to avoid build-time execution
+        const changePasswordSchema = z.object({
+            currentPassword: z.string().min(1, "Current password is required"),
+            newPassword: z.string().min(12, "New password must be at least 12 characters"),
+            confirmPassword: z.string()
+        }).refine((data) => data.newPassword === data.confirmPassword, {
+            message: "Passwords don't match",
+            path: ["confirmPassword"],
+        });
+
         // 1. Authenticate
         const session = await getSession();
         if (!session) {
@@ -57,7 +59,6 @@ export async function POST(request: NextRequest) {
         // 5. Verify Current Password
         const isValid = await verifyPassword(currentPassword, admin.passwordHash);
         if (!isValid) {
-            // Log this as a security event (could be someone who left browser open)
             await logSecurityEvent(admin.email, 'FAILED_PASSWORD_CHANGE', 'Incorrect current password');
             return NextResponse.json(
                 { error: 'Incorrect current password' },
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
             data: { passwordHash: newHash }
         });
 
-        // 7. Revoke All Sessions (Kick user out)
+        // 7. Revoke All Sessions
         await prisma.session.deleteMany({
             where: { adminId: admin.id }
         });
