@@ -105,9 +105,10 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
 
             router.push('/admin/articles');
             router.refresh();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Save error:', error);
-            toast.error('Opslaan mislukt');
+            const errorMessage = error.response?.data?.details || error.response?.data?.error || error.message || 'Opslaan mislukt';
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }

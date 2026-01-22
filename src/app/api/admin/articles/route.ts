@@ -1,8 +1,10 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getSession, hasRole } from '@/lib/auth';
 import { articleSchema } from '@/lib/validation';
 import { revalidatePath } from 'next/cache';
+import { sanitizeContent, logAudit } from '@/lib/security'; // Re-added import
 
 export const dynamic = 'force-dynamic';
 
@@ -58,15 +60,14 @@ export async function GET(request: NextRequest) {
         });
 
         return NextResponse.json({ articles });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Get articles error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Internal server error',
+            details: error.message
+        }, { status: 500 });
     }
 }
-
-import { sanitizeContent, logAudit } from '@/lib/security';
-
-// ...
 
 // POST /api/admin/articles - Create new article
 export async function POST(request: NextRequest) {
@@ -88,44 +89,59 @@ export async function POST(request: NextRequest) {
         }
 
         const data = validation.data;
-        const sanitizedContent = typeof data.content === 'string' ? sanitizeContent(data.content) : data.content;
+        // Ensure content is string
+        const sanitizedContent = typeof data.content === 'string' ? sanitizeContent(data.content) : String(data.content);
 
-        // Transaction to handle article and images
-        const article = await prisma.$transaction(async (tx) => {
-            // Create article
-            const created = await tx.article.create({
-                data: {
-                    title: data.title,
-                    summary: data.summary,
-                    category: data.category,
-                    slug: data.slug,
-                    content: sanitizedContent,
-                    seoTitle: data.seoTitle,
-                    seoDescription: data.seoDescription,
-                    keywords: data.keywords,
-                    isFeatured: data.isFeatured,
-                    isDraft: data.isDraft,
-                    publishDate: data.publishDate ? new Date(data.publishDate) : null,
-                    publishedAt: !data.isDraft ? new Date() : null,
-                    createdById: session.adminId,
-                    updatedById: session.adminId,
-                }
-            });
+        // Safe Date Parsing
+        let publishDate: Date | null = null;
+        if (data.publishDate) {
+            const parsed = new Date(data.publishDate);
+            if (!isNaN(parsed.getTime())) {
+                publishDate = parsed;
+            }
+        }
 
-            // Handle images if provided
-            if (data.images && data.images.length > 0) {
-                await tx.articleImage.createMany({
+        let publishedAt: Date | null = null;
+        if (!data.isDraft) {
+            publishedAt = new Date();
+        }
+
+        // 1. Create Article (No Transaction for safety)
+        const article = await prisma.article.create({
+            data: {
+                title: data.title,
+                summary: data.summary,
+                category: data.category,
+                slug: data.slug,
+                content: sanitizedContent,
+                seoTitle: data.seoTitle,
+                seoDescription: data.seoDescription,
+                keywords: data.keywords,
+                isFeatured: data.isFeatured,
+                isDraft: data.isDraft,
+                publishDate: publishDate,
+                publishedAt: publishedAt,
+                createdById: session.adminId,
+                updatedById: session.adminId,
+            }
+        });
+
+        // 2. Create Images if they exist
+        if (data.images && data.images.length > 0) {
+            try {
+                await prisma.articleImage.createMany({
                     data: data.images.map((img: any) => ({
-                        articleId: created.id,
+                        articleId: article.id,
                         url: img.url,
                         alt: img.alt,
                         order: img.order || 0
                     }))
                 });
+            } catch (imgError) {
+                console.error("Error creating images:", imgError);
+                // We don't fail the whole request if images fail, but we log it.
             }
-
-            return created;
-        });
+        }
 
         // await logAudit(session.adminId, 'CREATE', 'Article', article.id, { title: article.title });
 
@@ -141,11 +157,10 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
         console.error('Create article error:', error);
         return NextResponse.json({
-            error: 'Internal server error',
+            error: error.message || 'Internal server error',
             details: error.message,
             code: error.code, // Prisma error code
             meta: error.meta  // Prisma error meta
         }, { status: 500 });
     }
 }
-
