@@ -4,6 +4,8 @@ import { getSession, hasRole } from '@/lib/auth';
 import { articleSchema } from '@/lib/validation';
 import { revalidatePath } from 'next/cache';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/admin/articles - List all articles (with filters)
 export async function GET(request: NextRequest) {
     try {
