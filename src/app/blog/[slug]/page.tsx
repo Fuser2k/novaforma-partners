@@ -87,7 +87,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     if (!article) {
         return {
-            title: 'Makale Bulunamadı',
+            title: 'Artikel niet gevonden',
         };
     }
 
@@ -124,7 +124,7 @@ export default async function ArticleDetail({ params }: PageProps) {
             return <div className="prose prose-lg prose-slate max-w-none hover:prose-a:text-primary prose-a:font-bold prose-headings:font-serif prose-headings:text-slate-900 prose-p:text-slate-800 prose-p:leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />;
         }
 
-        return <div className="text-red-500 bg-red-50 p-4 rounded-lg">İçerik görüntülenemiyor.</div>;
+        return <div className="text-red-500 bg-red-50 p-4 rounded-lg">Inhoud kan niet worden weergegeven.</div>;
     };
 
     return (
@@ -137,7 +137,7 @@ export default async function ArticleDetail({ params }: PageProps) {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                         <Link href="/blog" className="inline-flex items-center text-slate-400 hover:text-white transition-colors text-sm font-medium group">
                             <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                            Blog'a Dön
+                            Terug naar Blog
                         </Link>
 
 
@@ -145,11 +145,11 @@ export default async function ArticleDetail({ params }: PageProps) {
 
                     <div className="flex flex-wrap gap-4 text-sm font-medium mb-6">
                         <span className="flex items-center text-primary bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full backdrop-blur-sm">
-                            <Tag className="h-3.5 w-3.5 mr-2" /> {article.category || 'Genel'}
+                            <Tag className="h-3.5 w-3.5 mr-2" /> {article.category || 'Algemeen'}
                         </span>
                         <span className="flex items-center text-slate-300">
                             <Calendar className="h-3.5 w-3.5 mr-2" />
-                            {new Date(article.publishedAt || new Date().toISOString()).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            {new Date(article.publishedAt || new Date().toISOString()).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </span>
 
                     </div>
@@ -198,8 +198,8 @@ export default async function ArticleDetail({ params }: PageProps) {
                                     <User className="h-6 w-6" />
                                 </div>
                                 <div className="ml-4">
-                                    <p className="text-sm font-bold text-slate-900">NovaForma Editörleri</p>
-                                    <p className="text-xs text-slate-500">Mevzuat Uzmanı</p>
+                                    <p className="text-sm font-bold text-slate-900">NovaForma Redactie</p>
+                                    <p className="text-xs text-slate-500">Wet- en Regelgeving Specialist</p>
                                 </div>
                             </div>
 
@@ -257,7 +257,7 @@ export default async function ArticleDetail({ params }: PageProps) {
                                                         <h4 className="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-2">
                                                             {recent.title}
                                                         </h4>
-                                                        <span className="text-xs text-slate-500">{new Date(recent.publishedAt || recent.createdAt || new Date().toISOString()).toLocaleDateString('tr-TR')}</span>
+                                                        <span className="text-xs text-slate-500">{new Date(recent.publishedAt || recent.createdAt || new Date().toISOString()).toLocaleDateString('nl-NL')}</span>
                                                     </div>
                                                 </div>
                                             </Link>

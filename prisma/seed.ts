@@ -168,6 +168,42 @@ async function seed() {
         });
         console.log('✅ Created landing page');
 
+        // Seed Legal Pages (Cookie Policy, etc.)
+        console.log('\n📜 Creating legal pages...');
+        const legalPages = [
+            {
+                title: 'Cookiebeleid',
+                slug: 'cookiebeleid',
+                content: JSON.stringify({
+                    type: 'doc',
+                    content: [
+                        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Cookiebeleid' }] },
+                        { type: 'paragraph', content: [{ type: 'text', text: 'Op deze pagina leggen we uit hoe wij cookies gebruiken om uw ervaring te verbeteren.' }] }
+                    ]
+                }),
+            },
+            {
+                title: 'Privacyverklaring',
+                slug: 'privacyverklaring', // Keep consistency
+                content: JSON.stringify({
+                    type: 'doc',
+                    content: [
+                        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Privacyverklaring' }] },
+                        { type: 'paragraph', content: [{ type: 'text', text: 'Uw privacy is belangrijk voor ons.' }] }
+                    ]
+                }),
+            }
+        ];
+
+        for (const page of legalPages) {
+            await prisma.legalPage.upsert({
+                where: { slug: page.slug },
+                update: {}, // Don't overwrite existing content if the user edited it
+                create: page,
+            });
+        }
+        console.log(`✅ Processed ${legalPages.length} legal pages`);
+
         console.log('\n✨ Seed complete!\n');
         console.log('📊 Summary:');
         console.log(`   ✅ Steps: ${steps.length}`);

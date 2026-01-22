@@ -39,9 +39,9 @@ export function CookieConsent() {
                     <X className="w-4 h-4" />
                 </button>
 
-                <h4 className="font-serif font-bold text-slate-900 mb-2">Çerez Tercihleri</h4>
+                <h4 className="font-serif font-bold text-slate-900 mb-2">Cookievoorkeuren</h4>
                 <p className="text-sm text-slate-600 leading-relaxed mb-6">
-                    Deneyiminizi iyileştirmek için çerezleri (cookies) kullanıyoruz. Detaylı bilgi için <Link href="/cerez-politikasi" className="text-primary hover:underline font-medium">Çerez Politikası</Link>'nı inceleyebilirsiniz.
+                    Wij gebruiken cookies om uw ervaring te verbeteren. Voor meer informatie kunt u ons <Link href="/cookiebeleid" className="text-primary hover:underline font-medium">Cookiebeleid</Link> raadplegen.
                 </p>
 
                 <div className="flex gap-3">
@@ -49,13 +49,13 @@ export function CookieConsent() {
                         onClick={handleAccept}
                         className="flex-1 bg-slate-900 text-white py-2.5 px-4 rounded-xl text-sm font-bold hover:bg-slate-800 transition-transform active:scale-95 shadow-lg shadow-slate-900/20"
                     >
-                        Kabul Et
+                        Accepteren
                     </button>
                     <button
                         onClick={handleDecline}
                         className="flex-1 bg-slate-100 text-slate-600 py-2.5 px-4 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors"
                     >
-                        Reddet
+                        Weigeren
                     </button>
                 </div>
             </div>
