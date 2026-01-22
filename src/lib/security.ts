@@ -4,9 +4,16 @@ import { headers } from 'next/headers';
 // --- Sanitization ---
 
 export function sanitizeContent(content: string): string {
-    // Lazy load to avoid JSDOM build errors
-    const DOMPurify = require('isomorphic-dompurify');
-    return DOMPurify.sanitize(content);
+    if (!content) return '';
+
+    // Lightweight sanitization without JSDOM/isomorphic-dompurify
+    // This avoids build issues primarily
+    return content
+        .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "")
+        .replace(/<iframe\b[^>]*>([\s\S]*?)<\/iframe>/gim, "")
+        .replace(/<object\b[^>]*>([\s\S]*?)<\/object>/gim, "")
+        .replace(/ on\w+="[^"]*"/g, "")
+        .replace(/javascript:/gi, "");
 }
 
 
