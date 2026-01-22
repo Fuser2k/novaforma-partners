@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
             return created;
         });
 
-        await logAudit(session.adminId, 'CREATE', 'Article', article.id, { title: article.title });
+        // await logAudit(session.adminId, 'CREATE', 'Article', article.id, { title: article.title });
 
         // Revalidate cache
         try {
