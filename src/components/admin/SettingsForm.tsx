@@ -18,8 +18,12 @@ export default function SettingsForm({ initialData }: { initialData?: any }) {
         try {
             await axios.put('/api/admin/settings', data);
             toast.success('Instellingen opgeslagen');
-        } catch (error) {
-            toast.error('Opslaan mislukt');
+        } catch (error: any) {
+            console.error('Update settings error:', error);
+            const errorMessage = error.response?.data?.details?.[0]?.message ||
+                error.response?.data?.error ||
+                'Opslaan mislukt';
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }

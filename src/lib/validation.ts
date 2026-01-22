@@ -58,15 +58,15 @@ export const messageSchema = z.object({
 });
 
 export const globalSettingsSchema = z.object({
-    facebookUrl: z.string().url().optional().or(z.literal('')),
-    instagramUrl: z.string().url().optional().or(z.literal('')),
-    twitterUrl: z.string().url().optional().or(z.literal('')),
-    linkedinUrl: z.string().url().optional().or(z.literal('')),
-    phone: z.string().max(50).optional(),
-    email: z.string().email().optional().or(z.literal('')),
-    address: z.string().optional(),
-    siteName: z.string().max(255).optional(),
-    siteDescription: z.string().optional(),
+    facebookUrl: z.string().optional().nullable(),
+    instagramUrl: z.string().optional().nullable(),
+    twitterUrl: z.string().optional().nullable(),
+    linkedinUrl: z.string().optional().nullable(),
+    phone: z.string().max(50).optional().nullable(),
+    email: z.string().email().optional().or(z.literal('')).nullable(),
+    address: z.string().optional().nullable(),
+    siteName: z.string().max(255).optional().nullable(),
+    siteDescription: z.string().optional().nullable(),
 });
 
 export const stepSchema = z.object({
