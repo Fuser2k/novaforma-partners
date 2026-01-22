@@ -5,6 +5,8 @@ import { articleSchema } from '@/lib/validation';
 import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/articles/[id] - Get single article
+export const dynamic = 'force-dynamic';
+
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
