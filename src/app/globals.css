@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --background: #021b33;
+  /* Deep McKinsey Navy */
+  --foreground: #ffffff;
+  --primary: #004e98;
+  --primary-foreground: #ffffff;
+  --secondary: #0f2942;
+  /* Slightly lighter navy for cards */
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-playfair);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -1,0 +1,237 @@
+// This is your Prisma schema file for SQLite
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ADMIN & AUTH
+// ============================================
+
+model Admin {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  role          String    @default("EDITOR") // AdminRole enum as string for SQLite
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  createdArticles Article[] @relation("ArticleCreator")
+  updatedArticles Article[] @relation("ArticleUpdater")
+  sessions        Session[]  
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  adminId   String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// CONTENT
+// ============================================
+
+model Article {
+  id              String    @id @default(uuid())
+  title           String
+  summary         String    // Removed @db.Text for SQLite
+  category        String
+  slug            String    @unique
+  content         String    // JSON as string for SQLite
+  seoTitle        String?
+  seoDescription  String?   // Removed @db.Text
+  keywords        String?
+  isFeatured      Boolean   @default(false)
+  publishDate     DateTime?
+  isDraft         Boolean   @default(true)
+  publishedAt     DateTime?
+  
+  // Media
+  images          ArticleImage[]
+  
+  // Audit
+  createdById     String?
+  updatedById     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  
+  createdBy       Admin?    @relation("ArticleCreator", fields: [createdById], references: [id])
+  updatedBy       Admin?    @relation("ArticleUpdater", fields: [updatedById], references: [id])
+}
+
+model ArticleImage {
+  id         String   @id @default(uuid())
+  articleId  String
+  url        String
+  alt        String?
+  caption    String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  
+  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model LegalPage {
+  id         String    @id @default(uuid())
+  title      String
+  slug       String    @unique
+  content    String    // JSON as string for SQLite
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+}
+
+model Message {
+  id             String    @id @default(uuid())
+  name           String
+  email          String
+  phone          String
+  sector         String    // MessageSector enum as string
+  region         String?
+  message        String    // Removed @db.Text
+  termsAccepted  Boolean   @default(false)
+  isRead         Boolean   @default(false)
+  isArchived     Boolean   @default(false)
+  notes          String?   // Removed @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model GlobalSettings {
+  id              String   @id @default(uuid())
+  // Social Media
+  facebookUrl     String?
+  instagramUrl    String?
+  twitterUrl      String?
+  linkedinUrl     String?
+  
+  // Contact
+  phone           String?
+  email           String?
+  address         String?
+  
+  // Other settings
+  siteName        String?
+  siteDescription String?  // Removed @db.Text
+  
+  updatedAt       DateTime @updatedAt
+}
+
+model Step {
+  id          String   @id @default(uuid())
+  number      Int      @unique
+  title       String
+  summary     String   // Removed @db.Text
+  description String?  // Removed @db.Text
+  isActive    Boolean  @default(true)
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Audience {
+  id          String   @id @default(uuid())
+  title       String
+  description String   // Removed @db.Text
+  benefits    String   // JSON string instead of String[] for SQLite
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  title       String
+  description String   // Removed @db.Text
+  icon        String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LandingPage {
+  id            String   @id @default(uuid())
+  slug          String   @unique
+  title         String?
+  subtitle      String?  // Removed @db.Text
+  heroVideoUrl  String?
+  heroImageUrl  String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ============================================
+// MEDIA MANAGEMENT
+// ============================================
+
+model Media {
+  id          String      @id @default(uuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  thumbnailUrl String?
+  alt         String?
+  caption     String?
+  folder      String?
+  uploadedById String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+}
+
+// ============================================
+// AUDIT LOG & SECURITY
+// ============================================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  adminId     String?
+  action      String
+  entity      String
+  entityId    String
+  changes     String?  // JSON as string for SQLite
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
+
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  userId    String?  
+  event     String   // "LOGIN", "FAILED_LOGIN", "LOGOUT", "PASSWORD_CHANGE"
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model LoginAttempt {
+  id        String   @id @default(uuid())
+  ipAddress String
+  email     String
+  attempts  Int      @default(1)
+  lastAttempt DateTime @default(now())
+  
+  @@unique([ipAddress, email])
+}
