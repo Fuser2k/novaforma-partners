@@ -27,12 +27,12 @@ export const articleSchema = z.object({
     category: z.string().min(1, 'Category is required').max(100),
     slug: z.string().min(1, 'Slug is required').max(255),
     content: z.any(), // JSON blocks from TipTap
-    seoTitle: z.string().max(255).optional(),
-    seoDescription: z.string().optional(),
-    keywords: z.string().optional(),
+    seoTitle: z.string().max(255).optional().nullable(),
+    seoDescription: z.string().optional().nullable(),
+    keywords: z.string().optional().nullable(),
     isFeatured: z.boolean().optional().default(false),
     isDraft: z.boolean().optional().default(true),
-    publishDate: z.string().optional(), // ISO date string
+    publishDate: z.string().optional().nullable(), // ISO date string
     images: z.array(z.object({
         url: z.string(),
         alt: z.string().optional(),
