@@ -1,10 +1,11 @@
 import { prisma } from '@/lib/db';
 import { headers } from 'next/headers';
-import DOMPurify from 'isomorphic-dompurify';
 
 // --- Sanitization ---
 
 export function sanitizeContent(content: string): string {
+    // Lazy load to avoid JSDOM build errors
+    const DOMPurify = require('isomorphic-dompurify');
     return DOMPurify.sanitize(content);
 }
 
